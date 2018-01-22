@@ -130,12 +130,24 @@ const enum MemberType {
     Instance
 }
 
+export enum Level {
+    none,
+    lifecycle,
+    timeline,
+}
+let tracingLevel: Level = Level.none;
+
 let profileFunctionFactory: <F extends Function>(fn: F, name: string, type?: MemberType) => F;
 export function enable(mode: InstrumentationMode = "counters") {
     profileFunctionFactory = mode && {
         counters: countersProfileFunctionFactory,
         timeline: timelineProfileFunctionFactory
     }[mode];
+
+    tracingLevel = {
+        lifecycle: Level.lifecycle,
+        timeline: Level.timeline,
+    }[mode] || Level.none;
 }
 
 try {
@@ -293,4 +305,12 @@ export function stopCPUProfile(name: string) {
     if (anyGlobal.android) {
         __stopCPUProfiler(name);
     }
+}
+
+export function level(): Level {
+    return tracingLevel;
+}
+
+export function trace(message: string, start: number, end: number): void {
+    log(`Timeline: Modules: ${message}  (${start}ms. - ${end}ms.)`);
 }
