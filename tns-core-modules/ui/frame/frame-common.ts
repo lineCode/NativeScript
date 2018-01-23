@@ -3,7 +3,7 @@ import { Frame as FrameDefinition, NavigationEntry, BackstackEntry, NavigationTr
 import { Page } from "../page";
 
 // Types.
-import { View, CustomLayoutView, isIOS, isAndroid, traceEnabled, traceWrite, traceCategories, EventData } from "../core/view";
+import { View, CustomLayoutView, isIOS, isAndroid, traceEnabled, traceWrite, traceCategories, EventData, Property } from "../core/view";
 import { resolveFileName } from "../../file-system/file-name-resolver";
 import { knownFolders, path } from "../../file-system";
 import { parse, createViewFromEntry } from "../builder";
@@ -215,7 +215,7 @@ export class FrameBase extends CustomLayoutView implements FrameDefinition {
             this._addView(newPage);
             newPage._frame = this;
         }
-        
+
         this._currentEntry = entry;
         this._executingEntry = null;
         newPage.onNavigatedTo(isBack);
@@ -580,3 +580,11 @@ export function goBack(): boolean {
 export function stack(): Array<FrameBase> {
     return frameStack;
 }
+
+export const src = new Property<FrameBase, string>({
+    name: "src", valueChanged: (frame: FrameBase, oldValue: string, newValue: string) => {
+        frame.navigate({ moduleName: newValue });
+    }
+});
+
+src.register(FrameBase)
